@@ -1,20 +1,36 @@
 import { Editor, useMonaco } from "@monaco-editor/react";
 import { useEffect, useRef, useState } from "react";
 import { useQueryHandlingUtils } from "../query-handler/QueryHandlingProvider";
-
+import './InputEditor.css';
 interface InputEditorProps {
     handleQueryInput: (val: string) => void,
-    setLineHeight: (lh : number) => void,
-    setFontSize: (fs: number) => void 
-} 
+    setLineHeight: (lh: number) => void,
+    setFontSize: (fs: number) => void
+}
+
+// Define a type for the color map
+type ColorMap = { [key: number]: string };
+
+// Create a function to generate pastel colors
+function generatePastelColor(): string {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
 
 export function InputEditor(props: InputEditorProps) {
+    const monaco = useMonaco();
+
+    const pastelColorMap: ColorMap = {};
 
     const viewZonesRef = useRef<string[]>([]);
 
-    const {setLineHeight, setFontSize} = props;
+    const { setLineHeight, setFontSize } = props;
 
-    const {handleQueryInput, queryResult} = useQueryHandlingUtils();
+    const { updateQuery, queryResult } = useQueryHandlingUtils();
 
     const editorRef = useRef<any>();
 
@@ -26,12 +42,18 @@ export function InputEditor(props: InputEditorProps) {
     };
 
     useEffect(() => {
-        if(editorRef.current) {
+        if (editorRef.current) {
             const viewZones: any[] = [];
             const zonesToRemove: string[] = [];
-            
+            const decorations: any[] = [];
+
             queryResult.lines.forEach((line, i) => {
-                if(line.expanded && line.viewZoneId == "") {
+                decorations.push({
+                    range: new monaco.Range(i + 1, 1, i + 1, 1),
+                options: { className: `myInlineDecoration-${(i + 1) % 6}`, isWholeLine: true }
+                })
+
+                if (line.expanded && line.viewZoneId == "") {
                     let domNode = document.createElement('div');
                     domNode.style.backgroundColor = '#eee';
                     const viewZone = {
@@ -42,14 +64,18 @@ export function InputEditor(props: InputEditorProps) {
 
                     viewZones.push(viewZone);
                 } else {
-                    if(line.viewZoneId != "") {
+                    if (line.viewZoneId != "") {
                         zonesToRemove.push(line.viewZoneId);
                         line.viewZoneId = "";
                     }
                 }
             })
 
-            
+            console.log(decorations);
+
+            console.log(editorRef.current.createDecorationsCollection(decorations));
+
+
             editorRef.current.changeViewZones((changeAccessor: any) => {
                 viewZonesRef.current.forEach((zoneId) => {
                     changeAccessor.removeZone(zoneId);
@@ -59,10 +85,14 @@ export function InputEditor(props: InputEditorProps) {
                     viewZonesRef.current.push(changeAccessor.addZone(viewZone));
                 })
             });
-            
+
         }
     }, [queryResult])
 
+    for (let i = 0; i <= 20; i++) {
+        pastelColorMap[i] = generatePastelColor();
+    }
+
     return <Editor width="45vw" defaultLanguage="saneql" value={queryResult.lines.map((line) => line.displayString).join("\n")}
-        onChange={handleQueryInput} onMount={handleEditorDidMount}/>;
+        onChange={updateQuery} onMount={handleEditorDidMount} />;
 }

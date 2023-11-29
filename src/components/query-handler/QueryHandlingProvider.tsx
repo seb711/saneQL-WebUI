@@ -3,9 +3,10 @@ import createModule from "../../saneql/saneql.mjs";
 
 interface QueryHandlingUtils {
     queryResult: QueryWrapper,
-    handleQueryInput: (s:string | undefined) => void, 
+    updateQuery: (s:string | undefined) => void, 
+    handleQueryInput: () => void, 
     handleExpandRow: (index: number, expanded: boolean) => void,
-    saneqlToSql: (s: string) => string
+    saneqlToSql: (s: string) => string,
 }
 
 const QueryHandlingContext = createContext<QueryHandlingUtils | undefined>(undefined)
@@ -14,13 +15,16 @@ export function QueryHandlingProvider({children}: PropsWithChildren) {
 
     const [module, setModule] = useState<any | null>(null);
     const [queryResult, setQueryResult] = useState<QueryWrapper>({lines: []});
+    const [query, setQueryString] = useState<string>("");
 
-    const handleQueryInput = (val: string | undefined) => {
-        if(!val) {
+
+
+    const handleQueryInput = () => {
+        if(!query) {
             setQueryResult({lines: []});
             return;
         }
-        const editorLines = val.split("\n");
+        const editorLines = query.split("\n");
 
         const queryLines: QueryLine[] = editorLines.map((val: string, i: number) : QueryLine => ({expanded: false, displayString: val, queryString: editorLines.slice(0, i + 1).join("\n"), resultColumns: [], resultRows: []}));
 
@@ -101,6 +105,12 @@ export function QueryHandlingProvider({children}: PropsWithChildren) {
         });
     }
 
+    const updateQuery = (val: string | undefined) => {
+        if (val) {
+            setQueryString(val);
+        }
+    }
+
     const saneqlToSql = (s: string) => {
         if (s[s.length - 1] == "\n") {
             return "";
@@ -114,7 +124,7 @@ export function QueryHandlingProvider({children}: PropsWithChildren) {
     }
 
     return (
-        <QueryHandlingContext.Provider value={{handleQueryInput, queryResult, saneqlToSql, handleExpandRow}}>
+        <QueryHandlingContext.Provider value={{handleQueryInput, updateQuery, queryResult, saneqlToSql, handleExpandRow}}>
             {children}
         </QueryHandlingContext.Provider>
     );

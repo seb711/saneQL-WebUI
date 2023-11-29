@@ -1,4 +1,6 @@
 import { useQueryHandlingUtils } from "../query-handler/QueryHandlingProvider";
+import '../editor/InputEditor.css';
+
 
 interface OutputComponentProps {
     lineHeight: number | null;
@@ -16,9 +18,9 @@ export function OutputComponent(props: OutputComponentProps) {
 
     return (
         <div style={{ height: "90vh", width: "40vw", overflow: "scroll" }}>
-            {
+            { 
                 (queryResult.lines ?? []).map((line, lineIndex) => (
-                    <div style={{ display: "grid", gridTemplateColumns: "minmax(100px, 1fr) ".repeat(line.resultColumns.length), width: "100%", columnGap: 8 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "minmax(100px, 1fr) ".repeat(line.resultColumns.length), width: "100%", columnGap: 8 }} className={`myInlineDecoration-${(lineIndex + 1) % 6}`}>
                         {
                             line.resultColumns.map((col, i) => (
                                 <div style={{ height: lineHeight, fontSize, color: "#000", gridColumnStart: i, gridColumnEnd: i + 1, userSelect: "none", cursor: "pointer" , textAlign:'left', paddingLeft: 4}} key={col} onClick={() => handleExpandRow(lineIndex, !line.expanded)}>
