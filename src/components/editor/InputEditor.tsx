@@ -1,34 +1,68 @@
-import {Editor, useMonaco} from "@monaco-editor/react";
-import {useEffect, useState} from "react";
-import {useQueryHandlingUtils} from "../query-handler/QueryHandlingProvider.tsx";
+import { Editor, useMonaco } from "@monaco-editor/react";
+import { useEffect, useRef, useState } from "react";
+import { useQueryHandlingUtils } from "../query-handler/QueryHandlingProvider";
 
-export function InputEditor() {
+interface InputEditorProps {
+    handleQueryInput: (val: string) => void,
+    setLineHeight: (lh : number) => void,
+    setFontSize: (fs: number) => void 
+} 
 
-    const [queryInput, setQueryInput] = useState("");
+export function InputEditor(props: InputEditorProps) {
 
-    const {saneqlToSql, performQuery} = useQueryHandlingUtils();
+    const viewZonesRef = useRef<string[]>([]);
 
-    const monaco = useMonaco();
+    const {setLineHeight, setFontSize} = props;
+
+    const {handleQueryInput, queryResult} = useQueryHandlingUtils();
+
+    const editorRef = useRef<any>();
+
+    const handleEditorDidMount = (editor: any) => {
+        editorRef.current = editor;
+        // Options are offset by 1 apparently https://microsoft.github.io/monaco-editor/docs.html#enums/editor.EditorOption.html
+        setFontSize(editor.getOption(52 - 1));
+        setLineHeight(editor.getOption(66 - 1));
+    };
 
     useEffect(() => {
-        if(monaco) {
-            monaco
-        }
-    }, [monaco]);
+        if(editorRef.current) {
+            const viewZones: any[] = [];
+            const zonesToRemove: string[] = [];
+            
+            queryResult.lines.forEach((line, i) => {
+                if(line.expanded && line.viewZoneId == "") {
+                    let domNode = document.createElement('div');
+                    domNode.style.backgroundColor = '#eee';
+                    const viewZone = {
+                        afterLineNumber: i + 1,
+                        heightInLines: line.resultRows.length,
+                        domNode
+                    };
 
-    const handleChange = (s: string) => {
-        if (s[s.length - 1] != "\n" || queryInput[queryInput.length - 1] === "\n") {
+                    viewZones.push(viewZone);
+                } else {
+                    if(line.viewZoneId != "") {
+                        zonesToRemove.push(line.viewZoneId);
+                        line.viewZoneId = "";
+                    }
+                }
+            })
 
-            setQueryInput(s);
-        } else {
-            setQueryInput(s + "\n".repeat(5));
+            
+            editorRef.current.changeViewZones((changeAccessor: any) => {
+                viewZonesRef.current.forEach((zoneId) => {
+                    changeAccessor.removeZone(zoneId);
+                })
+                viewZonesRef.current = [];
+                viewZones.forEach((viewZone) => {
+                    viewZonesRef.current.push(changeAccessor.addZone(viewZone));
+                })
+            });
+            
         }
-        const query = saneqlToSql(s);
-        if (query != "") {
-            performQuery(query);
-        }
-    }
+    }, [queryResult])
 
-    return <Editor height="90vh" width="45vw" defaultLanguage="saneql" value={queryInput}
-                   onChange={(val) => handleChange(val ?? "")}/>;
+    return <Editor width="45vw" defaultLanguage="saneql" value={queryResult.lines.map((line) => line.displayString).join("\n")}
+        onChange={handleQueryInput} onMount={handleEditorDidMount}/>;
 }
