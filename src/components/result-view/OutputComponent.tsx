@@ -1,5 +1,6 @@
 import { useQueryHandlingUtils } from "../query-handler/QueryHandlingProvider";
 import '../editor/InputEditor.css';
+import { Fragment } from "react";
 
 
 interface OutputComponentProps {
@@ -12,6 +13,8 @@ export function OutputComponent(props: OutputComponentProps) {
 
     const { queryResult, handleExpandRow } = useQueryHandlingUtils();
 
+    const maxColLength = Math.max(...queryResult.lines.map((line, lineIndex) => line.resultColumns.length));
+
     if (!lineHeight || !fontSize) {
         return <></>;
     }
@@ -20,24 +23,28 @@ export function OutputComponent(props: OutputComponentProps) {
         <div style={{ height: "90vh", width: "40vw", overflow: "scroll" }}>
             { 
                 (queryResult.lines ?? []).map((line, lineIndex) => (
-                    <div style={{ display: "grid", gridTemplateColumns: "minmax(100px, 1fr) ".repeat(line.resultColumns.length), width: "100%", columnGap: 8 }} className={`myInlineDecoration-${(lineIndex + 1) % 6}`}>
-                        {
-                            line.resultColumns.map((col, i) => (
-                                <div style={{ height: lineHeight, fontSize, color: "#000", gridColumnStart: i, gridColumnEnd: i + 1, userSelect: "none", cursor: "pointer" , textAlign:'left', paddingLeft: 4}} key={col} onClick={() => handleExpandRow(lineIndex, !line.expanded)}>
-                                    {col}
-                                </div>
-                            ))
-                        }
-                        {
-                            line.expanded && line.resultRows.map((row) => {
-                                return row.map((val, i) => (
-                                    <div style={{ height: lineHeight, fontSize, color: "#000", gridColumnStart: i, gridColumnEnd: i + 1, userSelect: "none", textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', textAlign: 'left', paddingLeft: 4 }}>
-                                        {val}
+                    <Fragment>
+                        <div style={{ width: "min-content", display: "grid", gridTemplateColumns: "minmax(100px, 1fr) ".repeat(maxColLength), columnGap: 8 }} className={`myInlineDecorationHeader-${(lineIndex + 1) % 6}`}>
+                            {
+                                line.resultColumns.map((col, i) => (
+                                    <div style={{height: lineHeight, fontSize, color: "#000", gridColumnStart: i, gridColumnEnd: i + 1, userSelect: "none", cursor: "pointer" , textAlign:'left', marginLeft: 4}} key={col} onClick={() => handleExpandRow(lineIndex, !line.expanded)}>
+                                        {col}
                                     </div>
                                 ))
-                            })
-                        }
-                    </div>
+                            }
+                        </div>
+                        <div style={{ width: "min-content", display: "grid", gridTemplateColumns: "minmax(100px, 1fr) ".repeat(maxColLength), columnGap: 8 }} className={`myInlineDecoration-${(lineIndex + 1) % 6}`}>
+                            {
+                                line.expanded && line.resultRows.map((row) => {
+                                    return row.map((val, i) => (
+                                        <div style={{ height: lineHeight, fontSize, color: "#000", gridColumnStart: i, gridColumnEnd: i + 1, userSelect: "none", textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', textAlign: 'left', paddingLeft: 4 }}>
+                                            {val}
+                                        </div>
+                                    ))
+                                })
+                            }
+                        </div>
+                    </Fragment>
                 ))
             }
 
