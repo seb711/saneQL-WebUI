@@ -1,5 +1,5 @@
-import { Editor, useMonaco } from "@monaco-editor/react";
-import { useEffect, useRef, useState } from "react";
+import { Editor } from "@monaco-editor/react";
+import { useEffect, useRef } from "react";
 import { useQueryHandlingUtils } from "../query-handler/QueryHandlingProvider";
 
 interface InputEditorProps {
@@ -28,10 +28,9 @@ export function InputEditor(props: InputEditorProps) {
     useEffect(() => {
         if(editorRef.current) {
             const viewZones: any[] = [];
-            const zonesToRemove: string[] = [];
             
             queryResult.lines.forEach((line, i) => {
-                if(line.expanded && line.viewZoneId == "") {
+                if(line.expanded) {
                     let domNode = document.createElement('div');
                     domNode.style.backgroundColor = '#eee';
                     const viewZone = {
@@ -41,14 +40,8 @@ export function InputEditor(props: InputEditorProps) {
                     };
 
                     viewZones.push(viewZone);
-                } else {
-                    if(line.viewZoneId != "") {
-                        zonesToRemove.push(line.viewZoneId);
-                        line.viewZoneId = "";
-                    }
                 }
             })
-
             
             editorRef.current.changeViewZones((changeAccessor: any) => {
                 viewZonesRef.current.forEach((zoneId) => {
