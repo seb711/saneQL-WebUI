@@ -8,23 +8,8 @@ interface InputEditorProps {
     setFontSize: (fs: number) => void
 }
 
-// Define a type for the color map
-type ColorMap = { [key: number]: string };
-
-// Create a function to generate pastel colors
-function generatePastelColor(): string {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
-
 export function InputEditor(props: InputEditorProps) {
     const monaco = useMonaco();
-
-    const pastelColorMap: ColorMap = {};
 
     const viewZonesRef = useRef<string[]>([]);
 
@@ -75,12 +60,9 @@ export function InputEditor(props: InputEditorProps) {
                 })
             });
 
+            editorRef.current.createDecorationsCollection(decorations);
         }
     }, [queryResult])
-
-    for (let i = 0; i <= 20; i++) {
-        pastelColorMap[i] = generatePastelColor();
-    }
 
     return <Editor width="45vw" defaultLanguage="saneql" value={queryResult.lines.map((line) => line.displayString).join("\n")}
         onChange={updateQuery} onMount={handleEditorDidMount} />;
