@@ -13,7 +13,7 @@ export function OutputComponent(props: OutputComponentProps) {
 
     const { queryResult, handleExpandRow } = useQueryHandlingUtils();
 
-    const maxColLength = Math.max(...queryResult.lines.map((line, lineIndex) => line.resultColumns.length));
+    const maxColLength = Math.max(...queryResult.lines.map((line, _) => line.resultColumns.length));
 
     if (!lineHeight || !fontSize) {
         return <></>;
