@@ -1,4 +1,5 @@
 import {createContext, PropsWithChildren, useContext, useEffect, useState} from "react";
+//@ts-ignore
 import createModule from "../../saneql/saneql.mjs";
 
 interface QueryHandlingUtils {
@@ -30,6 +31,10 @@ export function QueryHandlingProvider({children}: PropsWithChildren) {
 
         setQueryResult(prev => {
             queryLines.forEach((line, i) => {
+                // the query has not changed and therefore there is no need to update
+                if(prev.lines.length > i && prev.lines[i].queryString == line.queryString) {
+                    return;
+                }
                 // new Line
                 if (prev.lines.length <= i) {
                     prev.lines.push(line);
@@ -40,27 +45,19 @@ export function QueryHandlingProvider({children}: PropsWithChildren) {
                     prev.lines[i].queryString = line.queryString;
                     prev.lines[i].resultColumns = line.resultColumns;
                     prev.lines[i].resultRows = line.resultRows;
-                }
-                // else the query has not changed and therefore there is no need to update
-            })
-            return {...prev};
-        })
-
-        if(queryLines.length > 0) {
-            queryLines.forEach((line: QueryLine, index: number) => {
+                }         
+                
                 const sql = saneqlToSql(line.queryString);
 
                 if(sql != "") {
-                    fetchQueryResult(sql, index);
+                    fetchQueryResult(sql, i);
                 } else {
-                    setQueryResult(prev => {
-                        prev.lines[index].resultColumns = [];
-                        prev.lines[index].resultRows = [];
-                        return {...prev};
-                    });
+                    prev.lines[i].resultColumns = [];
+                    prev.lines[i].resultRows = [];
                 }
             })
-        }
+            return {...prev};
+        })
     }
 
     const handleExpandRow = (i: number, expanded: boolean) => {
@@ -72,6 +69,7 @@ export function QueryHandlingProvider({children}: PropsWithChildren) {
 
 
     useEffect(() => {
+        // @ts-ignore
         createModule().then((Module) => {
             setModule(Module);
         });
@@ -84,23 +82,27 @@ export function QueryHandlingProvider({children}: PropsWithChildren) {
             body: "set search_path = tpchSf1, public;\n" + q + " limit 4;"
         }).then(res => res.json()).then(res => {
             setQueryResult(prev => {
-                prev.lines[index].resultColumns = res.results[0].columns.map((col: {name: string}) => col.name);
+                    if(prev.lines[index].queryString != q) {
 
-                const returnedResults = res.results[0].result;
+                    prev.lines[index].resultColumns = res.results[0].columns.map((col: {name: string}) => col.name);
 
-                const resultRows: string[][] =[];
+                    const returnedResults = res.results[0].result;
 
-                for (let i = 0; i < returnedResults[0].length; ++i) {
-                    const row: string[] = [];
-                    returnedResults.forEach((res: string) => {
-                        row.push(res[i]);
-                    })
-                    resultRows.push(row);
+                    const resultRows: string[][] =[];
+
+                    for (let i = 0; i < returnedResults[0].length; ++i) {
+                        const row: string[] = [];
+                        returnedResults.forEach((res: string) => {
+                            row.push(res[i]);
+                        })
+                        resultRows.push(row);
+                    }
+
+                    prev.lines[index].resultRows = resultRows;
+
+                    return {...prev};
                 }
-
-                prev.lines[index].resultRows = resultRows;
-
-                return {...prev};
+                return prev;
             });
         });
     }
@@ -118,7 +120,7 @@ export function QueryHandlingProvider({children}: PropsWithChildren) {
         try {
             return module.saneql_to_sql(s)
         } catch (e) {
-            console.error(e.toString())
+            console.error(e)
             return "";
         }
     }

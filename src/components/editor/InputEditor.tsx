@@ -1,4 +1,4 @@
-import { Editor, useMonaco } from "@monaco-editor/react";
+import { Editor } from "@monaco-editor/react";
 import { useEffect, useRef } from "react";
 import { useQueryHandlingUtils } from "../query-handler/QueryHandlingProvider";
 import './InputEditor.css';
@@ -44,7 +44,6 @@ export function InputEditor(props: InputEditorProps) {
     useEffect(() => {
         if (editorRef.current) {
             const viewZones: any[] = [];
-            const zonesToRemove: string[] = [];
             const decorations: any[] = [];
 
             queryResult.lines.forEach((line, i) => {
@@ -53,7 +52,7 @@ export function InputEditor(props: InputEditorProps) {
                 options: { className: `myInlineDecoration-${(i + 1) % 6}`, isWholeLine: true }
                 })
 
-                if (line.expanded && line.viewZoneId == "") {
+                if (line.expanded) {
                     let domNode = document.createElement('div');
                     domNode.style.backgroundColor = '#eee';
                     const viewZone = {
@@ -63,19 +62,9 @@ export function InputEditor(props: InputEditorProps) {
                     };
 
                     viewZones.push(viewZone);
-                } else {
-                    if (line.viewZoneId != "") {
-                        zonesToRemove.push(line.viewZoneId);
-                        line.viewZoneId = "";
-                    }
                 }
             })
-
-            console.log(decorations);
-
-            console.log(editorRef.current.createDecorationsCollection(decorations));
-
-
+            
             editorRef.current.changeViewZones((changeAccessor: any) => {
                 viewZonesRef.current.forEach((zoneId) => {
                     changeAccessor.removeZone(zoneId);
