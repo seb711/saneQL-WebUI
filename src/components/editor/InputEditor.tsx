@@ -1,4 +1,4 @@
-import { Editor } from "@monaco-editor/react";
+import { Editor, useMonaco } from "@monaco-editor/react";
 import { useEffect, useRef } from "react";
 import { useQueryHandlingUtils } from "../query-handler/QueryHandlingProvider";
 import './InputEditor.css';
