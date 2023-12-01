@@ -3,6 +3,7 @@ import './App.css'
 import { QueryHandlingProvider } from "./components/query-handler/QueryHandlingProvider.tsx";
 import { InputEditor } from "./components/editor/InputEditor.tsx";
 import { OutputComponent } from "./components/result-view/OutputComponent.tsx";
+import { ActionBarComponent } from './components/actionbar/ActionBarComponent.tsx';
 
 function App() {
 
@@ -24,6 +25,7 @@ function App() {
                     alignItems: "flex-start",
                     justifyContent: "center"
                 }}>
+                    <ActionBarComponent/>
                     <InputEditor setLineHeight={setLineHeight} setFontSize={setFontSize} handleQueryInput={() => null} />
                     <OutputComponent lineHeight={lineHeight} fontSize={fontSize} />
                 </div>
