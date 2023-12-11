@@ -38,10 +38,11 @@ export function InputEditor(props: InputEditorProps) {
     useEffect(() => {
         if (editorRef.current) {
             // remove the decoration things
-            if (editorRef.current.getModel()) {
-                const currentDecorations = editorRef.current.getModel().getAllDecorations();
+            const model = editorRef.current.getModel()
+            if (model) {
+                const currentDecorations = model.getAllDecorations();
                 if (currentDecorations && currentDecorations.length > 0) {
-                    editorRef.current.getModel().deltaDecorations(currentDecorations.map((d : any) => d.id), []);
+                    model.deltaDecorations(currentDecorations.map((d : any) => d.id), []);
                 }
             }
 
@@ -90,6 +91,6 @@ export function InputEditor(props: InputEditorProps) {
         }
     }, [queryResult, handleQueryInput])
 
-    return <Editor width="45vw" defaultLanguage="saneql" value={queryResult.map((line) => line.displayString).join("\n")}
+    return <Editor height={"90vh"} width="50vw" defaultLanguage="saneql" value={queryResult.map((line) => line.displayString).join("\n")}
         onChange={updateQuery} onMount={handleEditorDidMount} />;
 }

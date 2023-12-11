@@ -3,7 +3,7 @@ import './App.css'
 import { QueryHandlingProvider } from "./components/query-handler/QueryHandlingProvider.tsx";
 import { InputEditor } from "./components/editor/InputEditor.tsx";
 import { OutputComponent } from "./components/result-view/OutputComponent.tsx";
-import { ActionBarComponent } from './components/actionbar/ActionBarComponent.tsx';
+import { Toolbar } from './components/toolbar/Toolbar.tsx';
 
 function App() {
 
@@ -14,23 +14,21 @@ function App() {
         <QueryHandlingProvider>
             <div style={{
                 display: "flex",
+                height: "5vh",
                 width: "100vw",
-                height: "100vh",
-                alignItems: 'center',
-                justifyContent: "center"
+                background: 'blue'
             }}>
-                <div style={{
-                    display: "flex",
-                    height: "90vh",
-                    alignItems: "flex-start",
-                    justifyContent: "center"
-                }}>
-                    <ActionBarComponent/>
-                    <InputEditor setLineHeight={setLineHeight} setFontSize={setFontSize} handleQueryInput={() => null} />
-                    <div>
-                        <OutputComponent lineHeight={lineHeight} fontSize={fontSize} />
-                    </div>
-                </div>
+                <Toolbar/>
+            </div>
+
+            <div style={{
+                display: "flex",
+                width: "100vw",
+                height: "95vh",
+            }}>
+
+                <InputEditor setLineHeight={setLineHeight} setFontSize={setFontSize} handleQueryInput={() => null} />
+                <OutputComponent lineHeight={lineHeight} fontSize={fontSize} />
             </div>
         </QueryHandlingProvider>
     )

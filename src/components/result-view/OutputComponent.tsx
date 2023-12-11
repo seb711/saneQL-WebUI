@@ -20,7 +20,7 @@ export function OutputComponent(props: OutputComponentProps) {
     }
 
     return (
-        <div style={{ height: "45vh", width: "40vw", overflow: "scroll" }}>
+        <div style={{ height: "90vh", width: "50vw", overflow: "scroll" }}>
             {
                 (queryResult ?? []).map((line, lineIndex) => (
                     line.error == "" ?

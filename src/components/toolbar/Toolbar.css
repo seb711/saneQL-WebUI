@@ -1,0 +1,40 @@
+/* Toolbar.css */
+
+/* Style for the toolbar container */
+.toolbar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  /* Style for the left side of the toolbar (dropdown and button) */
+  .toolbar-left img {
+    max-width: 100px; /* Adjust the logo size as needed */
+
+  }
+
+  /* Style for the "Run" button */
+  .run-btn {
+    background-color: transparent;
+    cursor: pointer;
+    border: none;
+    padding: 5px;
+    margin: 10px;
+    height: auto; /* Allow button to adjust height based on content */
+  }
+  
+  /* Hover effect for the button */
+  .run-btn:hover {
+    color: green;
+    background-color: transparent;
+  }
+  
+  /* Style for the right side of the toolbar (logo) */
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+  }

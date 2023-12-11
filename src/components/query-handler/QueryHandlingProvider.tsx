@@ -3,12 +3,14 @@ import { createContext, PropsWithChildren, useContext, useEffect, useState } fro
 //@ts-expect-error
 import createModule from "../../saneql/saneql.mjs";
 import { QueryLine } from "./QueryWrapper";
+import tpchQueries from '../../assets/tpchQueries';
 
 interface QueryHandlingUtils {
     queryResult: QueryLine[],
     updateQuery: (s: string | undefined) => void,
     handleQueryInput: () => void,
     handleExpandRow: (index: number, expanded: boolean) => void,
+    selectDefaultQuery: (num: number) => void
 }
 
 const QueryHandlingContext = createContext<QueryHandlingUtils | undefined>(undefined)
@@ -70,6 +72,11 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
         });
     }
 
+    const selectDefaultQuery = (i: number) => {
+        updateQuery(tpchQueries[i])
+        handleQueryInput()
+    }
+
 
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -120,12 +127,13 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
         try {
             return module.saneql_to_sql(s)
         } catch (e: unknown) {
+            console.log(e)
             throw e
         }
     }
 
     return (
-        <QueryHandlingContext.Provider value={{ handleQueryInput, updateQuery, queryResult, handleExpandRow }}>
+        <QueryHandlingContext.Provider value={{ handleQueryInput, updateQuery, queryResult, handleExpandRow, selectDefaultQuery }}>
             {children}
         </QueryHandlingContext.Provider>
     );

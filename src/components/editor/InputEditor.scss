@@ -1,4 +1,4 @@
-$numberOfGradients: 15; // Define the number of gradients you want
+$numberOfGradients: 50; // Define the number of gradients you want
 
 @for $i from 1 through $numberOfGradients {
   $opacity: calc($i / $numberOfGradients);
