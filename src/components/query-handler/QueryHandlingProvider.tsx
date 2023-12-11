@@ -54,6 +54,10 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
                     prev.lines[i].resultRows = [];
                 }
             })
+            // expand last line
+            if (prev.lines.length) {
+                prev.lines[prev.lines.length-1].expanded = true;
+            }
             return { ...prev };
         })
     }
@@ -73,7 +77,7 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
             setModule(Module);
         });
 
-        
+
     }, []);
 
 
