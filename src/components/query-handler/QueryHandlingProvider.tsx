@@ -1,78 +1,79 @@
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
-//@ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-expect-error
 import createModule from "../../saneql/saneql.mjs";
+import { QueryLine } from "./QueryWrapper";
 
 interface QueryHandlingUtils {
-    queryResult: QueryWrapper,
+    queryResult: QueryLine[],
     updateQuery: (s: string | undefined) => void,
     handleQueryInput: () => void,
     handleExpandRow: (index: number, expanded: boolean) => void,
-    saneqlToSql: (s: string) => string,
 }
 
 const QueryHandlingContext = createContext<QueryHandlingUtils | undefined>(undefined)
 
 export function QueryHandlingProvider({ children }: PropsWithChildren) {
 
-    const [module, setModule] = useState<any | null>(null);
-    const [queryResult, setQueryResult] = useState<QueryWrapper>({ lines: [] });
+    const [module, setModule] = useState<unknown | null>(null);
+    const [queryResult, setQueryResult] = useState<QueryLine[]>([]);
     const [query, setQueryString] = useState<string>("");
 
-    const handleQueryInput = () => {
+    const handleQueryInput = async () => {
         if (!query) {
-            setQueryResult({ lines: [] });
+            setQueryResult([]);
             return;
         }
         const editorLines = query.split("\n");
 
-        const queryLines: QueryLine[] = editorLines.map((val: string, i: number): QueryLine => ({ expanded: false, displayString: val, queryString: editorLines.slice(0, i + 1).join("\n"), resultColumns: [], resultRows: [] }));
+        const queryLines: QueryLine[] = editorLines.map((val: string, i: number): QueryLine => ({ expanded: false, displayString: val, queryString: editorLines.slice(0, i + 1).join("\n"), resultColumns: [], resultRows: [], error: "" }));
 
-        setQueryResult(prev => {
-            queryLines.forEach((line, i) => {
-                // the query has not changed and therefore there is no need to update
-                if (prev.lines.length > i && prev.lines[i].queryString == line.queryString) {
-                    return;
+        const getQueryResult = (queryLines: QueryLine[], setQueryResult: any) => {
+            const lines = queryLines.map(async (line) => {
+                let sql = "";
+        
+                try {
+                    sql = saneqlToSql(line.queryString);
+                } catch (e: unknown) {
+                    line.error = String(e)
                 }
-                // new Line
-                if (prev.lines.length <= i) {
-                    prev.lines.push(line);
-                }
-                // updated line
-                if (prev.lines[i].queryString != line.queryString) {
-                    prev.lines[i].displayString = line.displayString;
-                    prev.lines[i].queryString = line.queryString;
-                    prev.lines[i].resultColumns = line.resultColumns;
-                    prev.lines[i].resultRows = line.resultRows;
-                }
-
-                const sql = saneqlToSql(line.queryString);
 
                 if (sql != "") {
-                    fetchQueryResult(sql, i);
-                } else {
-                    prev.lines[i].resultColumns = [];
-                    prev.lines[i].resultRows = [];
-                }
+                    const {resultColumns, resultRows} : { resultColumns: string[]; resultRows: string[][]; } = await fetchQueryResult(sql);
+                    line.resultColumns = resultColumns;
+                    line.resultRows = resultRows;
+                } 
+                
+                return line;
             })
-            // expand last line
-            if (prev.lines.length) {
-                prev.lines[prev.lines.length-1].expanded = true;
-            }
-            return { ...prev };
-        })
+
+            Promise.all(lines)
+            .then((results) => {
+                results[results.length - 1].expanded = true;
+                setQueryResult(results);
+              })
+              .catch((error) => {
+                console.error(`Error in Promise.all: ${error}`);
+                setQueryResult([]); // Setting empty array in case of an error
+              });
+        }
+
+        getQueryResult(queryLines, setQueryResult);
     }
+
 
 
     const handleExpandRow = (i: number, expanded: boolean) => {
         setQueryResult(prev => {
-            prev.lines[i].expanded = expanded;
-            return { ...prev };
+            prev[i].expanded = expanded;
+            return [...prev];
         });
     }
 
 
     useEffect(() => {
-        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         createModule().then((Module) => {
             setModule(Module);
         });
@@ -81,34 +82,28 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
     }, []);
 
 
-    const fetchQueryResult = (q: string, index: number) => {
-        fetch("https://umbra.db.in.tum.de/api/query", {
+    const fetchQueryResult = (q: string): Promise<{ resultColumns: string[]; resultRows: string[][]; }> => {
+        return fetch("https://umbra.db.in.tum.de/api/query", {
             method: "POST",
             body: "set search_path = tpchSf1, public;\n" + q + " limit 4;"
         }).then(res => res.json()).then(res => {
-            setQueryResult(prev => {
-                if (prev.lines[index].queryString != q) {
+            const resultColumns = res.results[0].columns.map((col: { name: string }) => col.name);
 
-                    prev.lines[index].resultColumns = res.results[0].columns.map((col: { name: string }) => col.name);
+            const returnedResults = res.results[0].result;
 
-                    const returnedResults = res.results[0].result;
+            const resultRows: string[][] = [];
 
-                    const resultRows: string[][] = [];
+            for (let i = 0; i < returnedResults[0].length; ++i) {
+                const row: string[] = [];
+                returnedResults.forEach((res: string) => {
+                    row.push(res[i]);
+                })
+                resultRows.push(row);
+            }
 
-                    for (let i = 0; i < returnedResults[0].length; ++i) {
-                        const row: string[] = [];
-                        returnedResults.forEach((res: string) => {
-                            row.push(res[i]);
-                        })
-                        resultRows.push(row);
-                    }
-
-                    prev.lines[index].resultRows = resultRows;
-
-                    return { ...prev };
-                }
-                return prev;
-            });
+            return {
+                resultColumns, resultRows
+            };
         });
     }
 
@@ -118,20 +113,19 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
         }
     }
 
-    const saneqlToSql = (s: string) => {
+    const saneqlToSql = (s: string) : string => {
         if (s[s.length - 1] == "\n") {
             return "";
         }
         try {
             return module.saneql_to_sql(s)
-        } catch (e) {
-            console.error(e)
-            return "";
+        } catch (e: unknown) {
+            throw e
         }
     }
 
     return (
-        <QueryHandlingContext.Provider value={{ handleQueryInput, updateQuery, queryResult, saneqlToSql, handleExpandRow }}>
+        <QueryHandlingContext.Provider value={{ handleQueryInput, updateQuery, queryResult, handleExpandRow }}>
             {children}
         </QueryHandlingContext.Provider>
     );

@@ -1,7 +1,7 @@
 import { Editor, useMonaco } from "@monaco-editor/react";
 import { useEffect, useRef } from "react";
 import { useQueryHandlingUtils } from "../query-handler/QueryHandlingProvider";
-import './InputEditor.css';
+import './InputEditor.scss';
 interface InputEditorProps {
     handleQueryInput: (val: string) => void,
     setLineHeight: (lh: number) => void,
@@ -37,17 +37,25 @@ export function InputEditor(props: InputEditorProps) {
 
     useEffect(() => {
         if (editorRef.current) {
+            // remove the decoration things
+            if (editorRef.current.getModel()) {
+                const currentDecorations = editorRef.current.getModel().getAllDecorations();
+                if (currentDecorations && currentDecorations.length > 0) {
+                    editorRef.current.getModel().deltaDecorations(currentDecorations.map((d : any) => d.id), []);
+                }
+            }
+
             const viewZones: any[] = [];
             const decorations: any[] = [];
 
-            queryResult.lines.forEach((line, i) => {
+            queryResult.forEach((line, i) => {
                 decorations.push({
                     range: new monaco.Range(i + 1, 1, i + 1, 1),
-                options: { className: `myInlineDecoration-${(i + 1) % 6}`, isWholeLine: true }
+                    options: { className: i == queryResult.length - 1 ? `result` : `gradient-${i % 15}`, isWholeLine: true }
                 })
 
                 if (line.expanded) {
-                    let domNode = document.createElement('div');
+                    const domNode = document.createElement('div');
                     domNode.style.backgroundColor = '#eee';
                     const viewZone = {
                         afterLineNumber: i + 1,
@@ -82,6 +90,6 @@ export function InputEditor(props: InputEditorProps) {
         }
     }, [queryResult, handleQueryInput])
 
-    return <Editor width="45vw" defaultLanguage="saneql" value={queryResult.lines.map((line) => line.displayString).join("\n")}
+    return <Editor width="45vw" defaultLanguage="saneql" value={queryResult.map((line) => line.displayString).join("\n")}
         onChange={updateQuery} onMount={handleEditorDidMount} />;
 }

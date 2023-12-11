@@ -27,7 +27,9 @@ function App() {
                 }}>
                     <ActionBarComponent/>
                     <InputEditor setLineHeight={setLineHeight} setFontSize={setFontSize} handleQueryInput={() => null} />
-                    <OutputComponent lineHeight={lineHeight} fontSize={fontSize} />
+                    <div>
+                        <OutputComponent lineHeight={lineHeight} fontSize={fontSize} />
+                    </div>
                 </div>
             </div>
         </QueryHandlingProvider>

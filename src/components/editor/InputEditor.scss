@@ -1,0 +1,12 @@
+$numberOfGradients: 15; // Define the number of gradients you want
+
+@for $i from 1 through $numberOfGradients {
+  $opacity: calc($i / $numberOfGradients);
+  .gradient-#{$i - 1} {
+    background: rgba(0, 0, 0, $opacity);
+  }
+}
+
+.result {
+    background: rgba(255, 218, 185, 0.5);
+}
