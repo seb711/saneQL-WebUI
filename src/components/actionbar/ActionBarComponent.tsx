@@ -1,8 +1,23 @@
+import { useEffect } from "react";
 import { useQueryHandlingUtils } from "../query-handler/QueryHandlingProvider";
 import RunIcon from "@mui/icons-material/PlayArrow";
 
 export function ActionBarComponent() {
   const { handleQueryInput } = useQueryHandlingUtils();
+
+
+  useEffect(() => {
+      const keydownHandler = (e: any) => {
+          if (e.key === 'Enter' && e.ctrlKey) {
+              return handleQueryInput()
+          }
+        };
+
+      document.addEventListener('keydown', keydownHandler);
+      return () => {
+          document.removeEventListener('keydown', keydownHandler);
+      }
+  }, [handleQueryInput]);
 
   return (
     <div
