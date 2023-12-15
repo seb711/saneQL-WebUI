@@ -66,7 +66,7 @@ export function InputEditor(props: InputEditorProps) {
                     domNode.style.backgroundColor = '#eee';
                     const viewZone = {
                         afterLineNumber: line.lineRange.end,
-                        heightInLines: line.resultRows.length,
+                        heightInLines: line.resultRows.length - (line.lineRange.end - line.lineRange.start),
                         domNode
                     };
 
