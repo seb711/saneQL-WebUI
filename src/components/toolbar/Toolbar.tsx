@@ -38,8 +38,8 @@ export const Toolbar = () => {
                 <div className="toolbar-right">
                     <select onChange={handleSelectChange}>
                         <option value="" disabled selected>Load query</option>
-                        {options.map((option, index) => (
-                            <option key={index} value={option}>{option}</option>
+                        {[...Array(22)].map((_, index) => (
+                            <option key={index} value={index}>{index + 1}</option>
                         ))}
                     </select>
                     <RunIcon className="run-btn" onClick={handleQueryInput}/>

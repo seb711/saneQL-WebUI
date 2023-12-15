@@ -15,7 +15,7 @@ export function InputEditor(props: InputEditorProps) {
 
     const { setLineHeight, setFontSize } = props;
 
-    const { updateQuery, queryResult, handleQueryInput } = useQueryHandlingUtils();
+    const { updateQuery, queryResult, handleQueryInput, query } = useQueryHandlingUtils();
 
     const editorRef = useRef<any>();
 
@@ -35,9 +35,8 @@ export function InputEditor(props: InputEditorProps) {
         });
     };
 
-    useEffect(() => {
+    const removeDecorations = () => {
         if (editorRef.current) {
-            // remove the decoration things
             const model = editorRef.current.getModel()
             if (model) {
                 const currentDecorations = model.getAllDecorations();
@@ -45,21 +44,28 @@ export function InputEditor(props: InputEditorProps) {
                     model.deltaDecorations(currentDecorations.map((d : any) => d.id), []);
                 }
             }
+        }
+    }
+
+    useEffect(() => {
+        if (editorRef.current) {
+            // remove the decoration things
+            removeDecorations()
 
             const viewZones: any[] = [];
             const decorations: any[] = [];
 
             queryResult.forEach((line, i) => {
                 decorations.push({
-                    range: new monaco.Range(i + 1, 1, i + 1, 1),
+                    range: new monaco.Range(line.lineRange.start, 1, line.lineRange.end, 1),
                     options: { className: i == queryResult.length - 1 ? `result` : `gradient-${i % 15}`, isWholeLine: true }
                 })
 
-                if (line.expanded) {
+                if (line.expanded && line.lineRange.end - line.lineRange.start < line.resultRows.length + 1) {
                     const domNode = document.createElement('div');
                     domNode.style.backgroundColor = '#eee';
                     const viewZone = {
-                        afterLineNumber: i + 1,
+                        afterLineNumber: line.lineRange.end,
                         heightInLines: line.resultRows.length,
                         domNode
                     };
@@ -87,10 +93,12 @@ export function InputEditor(props: InputEditorProps) {
                 }) 
             });
 
-            editorRef.current.createDecorationsCollection(decorations);
+            if (decorations) {
+                editorRef.current.createDecorationsCollection(decorations);
+            }
         }
     }, [queryResult, handleQueryInput])
 
-    return <Editor height={"90vh"} width="50vw" defaultLanguage="saneql" value={queryResult.map((line) => line.displayString).join("\n")}
-        onChange={updateQuery} onMount={handleEditorDidMount} />;
+    return <Editor height={"90vh"} width="50vw" defaultLanguage="saneql" value={query}
+        onChange={(s: string | undefined) => {updateQuery(s);}} onMount={handleEditorDidMount} />;
 }
