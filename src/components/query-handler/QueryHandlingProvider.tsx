@@ -26,7 +26,7 @@ function ensureNewlineAtEnd(linesArray: string[]) {
 
 export function QueryHandlingProvider({ children }: PropsWithChildren) {
 
-    const [module, setModule] = useState<unknown | null>(null);
+    const [module, setModule] = useState<any | null>(null);
     const [queryResult, setQueryResult] = useState<QueryLine[]>([]);
     const [query, setQueryString] = useState<string>("");
 

@@ -3,8 +3,6 @@ import { useQueryHandlingUtils } from '../query-handler/QueryHandlingProvider';
 import './Toolbar.css'; // You can create a CSS file for styling
 import RunIcon from "@mui/icons-material/PlayArrow";
 
-const options = [0, 1]; // Dropdown options
-
 export const Toolbar = () => {
     const { handleQueryInput, selectDefaultQuery } = useQueryHandlingUtils();
 
