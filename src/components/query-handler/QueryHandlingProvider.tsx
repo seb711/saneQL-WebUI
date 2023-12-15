@@ -32,10 +32,10 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
 
         const getQueryResult = (queryLines: string[], setQueryResult: any) => {            
             const queryResult = queryLines.map(async (line, i) => {
-                const currentQueryString = editorLines.slice(0, i + 1).join("")
-                console.log(currentQueryString)
+                const currentQueryString = queryLines.slice(0, i + 1).join("")
                 // if there is a result we add the thing in the query result        
                 const output : {query: string, error: string} = saneqlToSql(currentQueryString);
+
                 if (output.error != "") {
                     const result: QueryLine = {
                         expanded: false, 
@@ -84,7 +84,6 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
 
                 // display error for last line
                 if (results.length > 0 && results[results.length - 1].error !+ "") {
-                    console.log("ERROR")
                     finalQueryResult.push(results[results.length - 1])
                 } else {
                     finalQueryResult[finalQueryResult.length - 1].expanded = true;
