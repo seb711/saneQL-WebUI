@@ -16,14 +16,6 @@ interface QueryHandlingUtils {
 
 const QueryHandlingContext = createContext<QueryHandlingUtils | undefined>(undefined)
 
-function ensureNewlineAtEnd(linesArray: string[]) {
-    for (let i = 0; i < linesArray.length; i++) {
-        if (!linesArray[i].endsWith('\n')) {
-            linesArray[i] += '\n';
-        }
-    }
-}
-
 export function QueryHandlingProvider({ children }: PropsWithChildren) {
 
     const [module, setModule] = useState<any | null>(null);
@@ -38,51 +30,50 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
 
         const editorLines = query.split("\n");
 
-        ensureNewlineAtEnd(editorLines);
-
         const getQueryResult = (queryLines: string[], setQueryResult: any) => {            
-            let currentError = "";
-            let currentQueryString = "";
-
             const queryResult = queryLines.map(async (line, i) => {
-                currentQueryString = editorLines.slice(0, i + 1).join("")
+                const currentQueryString = editorLines.slice(0, i + 1).join("")
+                console.log(currentQueryString)
                 // if there is a result we add the thing in the query result        
-                try {
-                    const output : {query: string, error: string} = saneqlToSql(currentQueryString);
-                    if (output.error != "") {
-                        console.log(output)
-                        currentError = output.error;
-                        return null;
-                    } else {
-                        const {resultColumns, resultRows} : { resultColumns: string[]; resultRows: string[][]; } = await fetchQueryResult(output.query);
+                const output : {query: string, error: string} = saneqlToSql(currentQueryString);
+                if (output.error != "") {
+                    const result: QueryLine = {
+                        expanded: false, 
+                        queryString: currentQueryString,
+                        displayString: line,
+                        lineRange: {start: i + 1, end: i + 1},
+                        resultColumns: [],
+                        resultRows: [],
+                        error: output.error
+                    };
 
-                        const result: QueryLine = {
-                            expanded: false, 
-                            queryString: currentQueryString,
-                            displayString: line,
-                            lineRange: {start: i + 1, end: i + 1},
-                            resultColumns: resultColumns,
-                            resultRows: resultRows,
-                            error: ""
-                        };
+                    return result;
+                } else {
+                    const {resultColumns, resultRows} : { resultColumns: string[]; resultRows: string[][]; } = await fetchQueryResult(output.query);
 
-                        currentError = "";
-                        return result;
-                    }
-                } catch (e: unknown) {
-                    console.error(e);
+                    const result: QueryLine = {
+                        expanded: false, 
+                        queryString: currentQueryString,
+                        displayString: line,
+                        lineRange: {start: i + 1, end: i + 1},
+                        resultColumns: resultColumns,
+                        resultRows: resultRows,
+                        error: ""
+                    };
+
+                    return result;
                 }
-                return null;
+
             })
 
             Promise.all(queryResult)
             .then((results) => {
                 const finalQueryResult: QueryLine[] = [];
 
-                const prevLine : QueryLine | null | undefined = results.find(element => element !== null);
-                let prevLineNumber = prevLine && prevLine != null ? prevLine.lineRange.start - 1 : 0
+                const prevLine : QueryLine | undefined = results.find(element => element.error == "" );
+                let prevLineNumber = prevLine ? prevLine.lineRange.start - 1 : 0
                 results.forEach((result) => {
-                    if (result !== null) {
+                    if (result.error == "") {
                         finalQueryResult.push({
                             ...result, 
                             lineRange: {start: prevLineNumber + 1, end: result.lineRange.end}
@@ -92,16 +83,9 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
                 })
 
                 // display error for last line
-                if (currentError != "") {
-                    finalQueryResult.push({
-                        expanded: false, 
-                            queryString: currentQueryString,
-                            displayString: '',
-                            lineRange: {start: editorLines.length - 1, end: editorLines.length},
-                            resultColumns: [],
-                            resultRows: [],
-                            error: currentError
-                    })
+                if (results.length > 0 && results[results.length - 1].error !+ "") {
+                    console.log("ERROR")
+                    finalQueryResult.push(results[results.length - 1])
                 } else {
                     finalQueryResult[finalQueryResult.length - 1].expanded = true;
                 }
