@@ -4,9 +4,11 @@ import { QueryHandlingProvider } from "./components/query-handler/QueryHandlingP
 import { InputEditor } from "./components/editor/InputEditor.tsx";
 import { OutputComponent } from "./components/result-view/OutputComponent.tsx";
 import { Toolbar } from './components/toolbar/Toolbar.tsx';
+import { Box, Typography, useTheme } from '@mui/material';
+import { DARK_MODE } from './main.tsx';
 
 function App() {
-
+    const {palette} = useTheme();
     const [lineHeight, setLineHeight] = useState<number | null>(null);
     const [fontSize, setFontSize] = useState<number | null>(null);
 
@@ -14,7 +16,7 @@ function App() {
         <QueryHandlingProvider>
             <div style={{
                 display: "flex",
-                height: "5vh",
+                height: "8vh",
                 width: "100vw",
                 background: 'blue'
             }}>
@@ -24,11 +26,29 @@ function App() {
             <div style={{
                 display: "flex",
                 width: "100vw",
-                height: "95vh",
+                height: "87vh",
             }}>
 
                 <InputEditor setLineHeight={setLineHeight} setFontSize={setFontSize} handleQueryInput={() => null} />
                 <OutputComponent lineHeight={lineHeight} fontSize={fontSize} />
+            </div>
+            <div style={{
+                display: "flex",
+                height: "5vh",
+                width: "100vw",
+                boxSizing: "border-box",
+                alignItems: "center",
+                padding: 8,
+                paddingLeft: 16,
+                paddingRight: 16,
+                backgroundColor: palette.background.default
+            }}>
+                <Typography fontSize={".8em"}>Interface by TUMuchData (Sebastian Kosak, Paul Lampe)</Typography>
+                <Box flex={1}/>
+                <Box display={"flex"} height="100%" alignItems={"center"} justifyContent={"flex-end"} gap={1}>
+                    <Typography fontSize={".8em"}>Powered by</Typography>
+                    <img src={DARK_MODE ? "./umbra-white.png" : "./umbra-black.png"} style={{height: ".8em"}}></img>
+                </Box>
             </div>
         </QueryHandlingProvider>
     )

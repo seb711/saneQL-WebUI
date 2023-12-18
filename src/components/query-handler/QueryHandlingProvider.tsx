@@ -133,7 +133,7 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
                 return "query=" + encodeURIComponent(s);
             },
             getQueryResults: (res: {result: string[][]}) => {
-                return res.result.slice(0, 6);
+                return res.result;
             },
             getQueryResultColumns: (res: {columns: string[]}) => {
                 return res.columns;
@@ -142,10 +142,31 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
         {
             url: "https://umbra.db.in.tum.de/api/query",
             getQueryBody: (s: string) => {
-                return "set search_path = tpchSf1, public;\n" + s + ";"
+                let limitedQuery = s;
+                const limitStr = s.match(/limit\s[0-9]+/)?.[0];
+
+                if(limitStr) {
+                    const limit = Number.parseInt(limitStr.replace("limit ", ""));
+                    if (limit > 6) {
+                        limitedQuery = limitedQuery.replace(/limit\s[0-9]+/, `limit 6`)
+                    }
+                } else {
+                    limitedQuery += " limit 6";
+                }
+
+                return "set search_path = tpchSf1, public;\n" + limitedQuery;
             },
             getQueryResults: (res: {results: {result: string[][]}[]}) => {
-                return res.results[0].result.slice(0, 6);
+                const values = res.results[0].result;
+                const transposedResult = new Array(values[0].length).fill(0).map(() => new Array<string>(values.length).fill(""));
+                
+                for (let i = 0; i < values.length; ++i) {
+                    for (let j = 0; j < values[0].length; ++j) {
+                        transposedResult[j][i] = values[i][j];
+                    }
+                }
+
+                return transposedResult;
             },
             getQueryResultColumns: (res: {results: {columns: {name: string}[]}[]}) => {
                 return res.results[0].columns.map((col: { name: string }) => col.name);
@@ -154,13 +175,15 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
     ]
 
     const fetchQueryResult = (q: string): Promise<{ resultColumns: string[]; resultRows: string[][]; }> => {
-        return fetch(dbConfig[0].url, {
-            method: "POST",
-            body: dbConfig[0].getQueryBody(q)
-        }).then(res => res.json()).then(res => {
-            const resultColumns = dbConfig[0].getQueryResultColumns(res);
+        const config = dbConfig[1];
 
-            const returnedResults = dbConfig[0].getQueryResults(res);
+        return fetch(config.url, {
+            method: "POST",
+            body: config.getQueryBody(q)
+        }).then(res => res.json()).then(res => {
+            const resultColumns = config.getQueryResultColumns(res);
+
+            const returnedResults = config.getQueryResults(res);
 
             const resultRows: string[][] = [];
 
@@ -171,7 +194,6 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
                     row.push(val);
                 })  
                 resultRows.push(row);
-
             })
 
             return {

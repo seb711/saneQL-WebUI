@@ -7,14 +7,15 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background-color: #f0f0f0;
     border-bottom: 1px solid #ccc;
   }
   
-  /* Style for the left side of the toolbar (dropdown and button) */
-  .toolbar-left img {
-    max-width: 100px; /* Adjust the logo size as needed */
-
+  /* Style for the left */
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
   }
 
   /* Style for the "Run" button */
