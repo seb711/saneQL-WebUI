@@ -44,7 +44,7 @@ function App() {
                 paddingRight: 16,
                 backgroundColor: palette.background.default
             }}>
-                <Typography fontSize={".8em"}>Interface by TUMuchData (<a href={'https://github.com/seb711'} style={{color: palette.text.primary}} target="_blank">Sebastian Kosak</a>, <a href={'https://github.com/paullampe'} style={{color: palette.text.primary}} target="_blank">Paul Lampe</a>)</Typography>
+                <Typography fontSize={".8em"}>Interface by <a href={'https://www.tumuchdata.club/'} style={{color: palette.text.primary}} target="_blank">TUMuchData</a> (<a href={'https://github.com/seb711'} style={{color: palette.text.primary}} target="_blank">Sebastian Kosak</a>, <a href={'https://github.com/paullampe'} style={{color: palette.text.primary}} target="_blank">Paul Lampe</a>)</Typography>
                 <Box flex={1}/>
                 <Box display={"flex"} height="100%" alignItems={"center"} justifyContent={"flex-end"} gap={1}>
                     <Typography fontSize={".8em"}>Powered by</Typography>
