@@ -25,7 +25,7 @@ export function InputEditor(props: InputEditorProps) {
         setFontSize(editor.getOption(52 - 1));
         setLineHeight(editor.getOption(66 - 1));
 
-        editor.addAction({
+        editorRef.current.addAction({
             id: "executeQueryAction",
             label: "Execute Query",
             keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
@@ -35,8 +35,9 @@ export function InputEditor(props: InputEditorProps) {
         });
     };
 
-    const removeDecorations = () => {
+    useEffect(() => {
         if (editorRef.current) {
+            // remove the decoration things
             const model = editorRef.current.getModel()
             if (model) {
                 const currentDecorations = model.getAllDecorations();
@@ -44,13 +45,6 @@ export function InputEditor(props: InputEditorProps) {
                     model.deltaDecorations(currentDecorations.map((d : any) => d.id), []);
                 }
             }
-        }
-    }
-
-    useEffect(() => {
-        if (editorRef.current) {
-            // remove the decoration things
-            removeDecorations()
 
             const viewZones: any[] = [];
             const decorations: any[] = [];
@@ -58,7 +52,7 @@ export function InputEditor(props: InputEditorProps) {
             queryResult.forEach((line, i) => {
                 decorations.push({
                     range: new monaco.Range(line.lineRange.start, 1, line.lineRange.end, 1),
-                    options: { className: i == queryResult.length - 1 ? `result` : `gradient-${i % 15}`, isWholeLine: true }
+                    options: { className: i == queryResult.length - 1 ? `result` : `gradient-1`, isWholeLine: true }
                 })
 
                 if (line.expanded && line.lineRange.end - line.lineRange.start < line.resultRows.length + 1) {
@@ -93,11 +87,9 @@ export function InputEditor(props: InputEditorProps) {
                 }) 
             });
 
-            if (decorations) {
-                editorRef.current.createDecorationsCollection(decorations);
-            }
+            editorRef.current.getModel().deltaDecorations([], decorations);
         }
-    }, [queryResult, handleQueryInput])
+    }, [queryResult, handleQueryInput, monaco])
 
     return <Editor height={"90vh"} width="50vw" defaultLanguage="saneql" value={query}
         onChange={(s: string | undefined) => {updateQuery(s);}} onMount={handleEditorDidMount} />;

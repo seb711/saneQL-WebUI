@@ -89,8 +89,6 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
                     finalQueryResult[finalQueryResult.length - 1].expanded = true;
                 }
 
-                console.log(finalQueryResult)
-
                 setQueryResult(finalQueryResult);
               })
               .catch((error) => {
@@ -160,7 +158,6 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
             method: "POST",
             body: dbConfig[0].getQueryBody(q)
         }).then(res => res.json()).then(res => {
-            console.log(res);
             const resultColumns = dbConfig[0].getQueryResultColumns(res);
 
             const returnedResults = dbConfig[0].getQueryResults(res);
@@ -176,8 +173,6 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
                 resultRows.push(row);
 
             })
-
-            console.log( resultColumns, resultRows)
 
             return {
                 resultColumns, resultRows
@@ -199,7 +194,6 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
             const output = module.saneql_to_sql(s)
             return JSON.parse(output)
         } catch (e: any) {
-            console.log(e)
             return {query: '', error: e.toString()};
         }
     }
