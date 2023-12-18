@@ -41,7 +41,7 @@ export function OutputComponent(props: OutputComponentProps) {
     }
 
     return (
-        <div style={{ height: "87vh", width: "50vw", overflow: "scroll", backgroundColor: palette.background.paper }}>
+        <div style={{ height: "87vh", width: "49.5vw", overflow: "scroll", backgroundColor: palette.background.paper }}>
             {startBlock}
             {
                 (queryResult ?? []).map((line, lineIndex) => {

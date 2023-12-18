@@ -100,7 +100,7 @@ export function InputEditor(props: InputEditorProps) {
 
     return <Editor
         height={"87vh"}
-        width="50vw"
+        width="49.5vw"
         defaultLanguage="saneql"
         value={query}
         onChange={(s: string | undefined) => { updateQuery(s); }}

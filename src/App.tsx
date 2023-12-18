@@ -18,7 +18,6 @@ function App() {
                 display: "flex",
                 height: "8vh",
                 width: "100vw",
-                background: 'blue'
             }}>
                 <Toolbar/>
             </div>
@@ -27,9 +26,11 @@ function App() {
                 display: "flex",
                 width: "100vw",
                 height: "87vh",
+                background: palette.background.default
             }}>
 
                 <InputEditor setLineHeight={setLineHeight} setFontSize={setFontSize} handleQueryInput={() => null} />
+                <Box flex={1}></Box>
                 <OutputComponent lineHeight={lineHeight} fontSize={fontSize} />
             </div>
             <div style={{
