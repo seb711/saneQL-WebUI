@@ -5,5 +5,5 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   // https://vitejs.dev/guide/static-deploy
-  base: "/saneQL-WebUI/",
+  base: "/",
 })
