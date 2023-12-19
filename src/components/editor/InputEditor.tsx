@@ -3,6 +3,8 @@ import { useEffect, useRef } from "react";
 import { useQueryHandlingUtils } from "../query-handler/QueryHandlingProvider";
 import './InputEditor.scss';
 import { DARK_MODE } from "../../main";
+import { SaneqlLanguage } from "../../saneql/SaneqlLanguage";
+
 interface InputEditorProps {
     handleQueryInput: (val: string) => void,
     setLineHeight: (lh: number) => void,
@@ -25,6 +27,8 @@ export function InputEditor(props: InputEditorProps) {
         // Options are offset by 1 apparently https://microsoft.github.io/monaco-editor/docs.html#enums/editor.EditorOption.html
         setFontSize(editor.getOption(52 - 1));
         setLineHeight(editor.getOption(66 - 1));
+
+        SaneqlLanguage.register(monaco);
 
         editorRef.current.addAction({
             id: "executeQueryAction",
