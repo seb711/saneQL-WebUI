@@ -11,7 +11,7 @@ interface QueryHandlingUtils {
     updateQuery: (s: string | undefined) => void,
     handleQueryInput: () => void,
     handleExpandRow: (index: number, expanded: boolean) => void,
-    selectDefaultQuery: (num: number) => void
+    selectDefaultQuery: (key: string) => void
 }
 
 const QueryHandlingContext = createContext<QueryHandlingUtils | undefined>(undefined)
@@ -109,8 +109,8 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
         });
     }
 
-    const selectDefaultQuery = (i: number) => {
-        updateQuery(tpchQueries[i])
+    const selectDefaultQuery = (key: string) => {
+        updateQuery(tpchQueries[key])
         setQueryResult([])
     }
 

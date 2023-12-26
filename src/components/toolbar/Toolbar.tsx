@@ -4,6 +4,8 @@ import './Toolbar.css'; // You can create a CSS file for styling
 import RunIcon from "@mui/icons-material/PlayArrow";
 import { Box, IconButton, MenuItem, Select, Typography, useTheme } from '@mui/material';
 import { DARK_MODE } from '../../main';
+import tpchQueries from '../../assets/tpchQueries';
+
 
 export const Toolbar = () => {
     const { palette } = useTheme();
@@ -28,7 +30,7 @@ export const Toolbar = () => {
     const handleSelectChange = (event: any) => {
         if (event.target.value >= 0) {
             setSelectedQuery(event.target.value);
-            selectDefaultQuery(event.target.value);
+            selectDefaultQuery(Object.keys(tpchQueries)[event.target.value]);
         }
     };
 
@@ -52,10 +54,10 @@ export const Toolbar = () => {
                                 Load query
                             </Typography>
                         </MenuItem>
-                        {[...Array(22)].map((_, index) => (
+                        {Object.keys(tpchQueries).map((key, index) => (
                             <MenuItem key={index} value={index}>
                                 <Typography textAlign={'center'} width={'100%'}>
-                                    {`TPC-H ${index + 1}`}
+                                    {key}
                                 </Typography>
                             </MenuItem>
                         ))}
