@@ -49,7 +49,7 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
 
                     return result;
                 } else {
-                    const {resultColumns, resultRows} : { resultColumns: string[]; resultRows: string[][]; } = await fetchQueryResult(output.query);
+                    const {resultColumns, resultRows} : { resultColumns: string[]; resultRows: string[][]; } = await fetchQueryResult(output.query, i + 1 < queryLines.length);
 
                     const result: QueryLine = {
                         expanded: false, 
@@ -125,7 +125,7 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
 
     }, []);
 
-    const dbConfig: {url: string, getQueryBody: (s: string) => string, getQueryResults: (o: any) => string[][], getQueryResultColumns: (o: any) => string[]}[] = [
+    const dbConfig: {url: string, getQueryBody: (s: string, limit: boolean) => string, getQueryResults: (o: any) => string[][], getQueryResultColumns: (o: any) => string[]}[] = [
         {
             url: "https://hyper-db.de/interface/query",
             getQueryBody: (s: string) => {
@@ -141,17 +141,23 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
         }, 
         {
             url: "https://umbra.db.in.tum.de/api/query",
-            getQueryBody: (s: string) => {
+            getQueryBody: (s: string, limit: boolean) => {
                 let limitedQuery = s;
                 const limitStr = s.match(/limit\s[0-9]+/)?.[0];
+
+                let maxLimit : number = 26;
+
+                if (limit) {
+                    maxLimit = 6
+                }
 
                 if(limitStr) {
                     const limit = Number.parseInt(limitStr.replace("limit ", ""));
                     if (limit > 6) {
-                        limitedQuery = limitedQuery.replace(/limit\s[0-9]+/, `limit 6`)
+                        limitedQuery = limitedQuery.replace(/limit\s[0-9]+/, ` limit ${maxLimit}`)
                     }
                 } else {
-                    limitedQuery += " limit 6";
+                    limitedQuery += ` limit ${maxLimit}`;
                 }
 
                 return "set search_path = tpchSf1, public;\n" + limitedQuery;
@@ -174,12 +180,12 @@ export function QueryHandlingProvider({ children }: PropsWithChildren) {
         }, 
     ]
 
-    const fetchQueryResult = (q: string): Promise<{ resultColumns: string[]; resultRows: string[][]; }> => {
+    const fetchQueryResult = (q: string, limit: boolean): Promise<{ resultColumns: string[]; resultRows: string[][]; }> => {
         const config = dbConfig[1];
 
         return fetch(config.url, {
             method: "POST",
-            body: config.getQueryBody(q)
+            body: config.getQueryBody(q, limit)
         }).then(res => res.json()).then(res => {
             const resultColumns = config.getQueryResultColumns(res);
 

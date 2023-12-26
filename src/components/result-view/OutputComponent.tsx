@@ -41,14 +41,14 @@ export function OutputComponent(props: OutputComponentProps) {
     }
 
     return (
-        <div style={{ height: "87vh", width: "49.5vw", overflow: "scroll", backgroundColor: palette.background.paper }}>
+        <div style={{ height: "87vh", width: "49.5vw", overflow: "scroll", backgroundColor: palette.background.paper, display: "flex", flexDirection: "column" }}>
             {startBlock}
             {
                 (queryResult ?? []).map((line, lineIndex) => {
                     let counter = line.lineRange.end - line.lineRange.start;
                     return (line.error == "" ?
                         <Fragment key={`${lineIndex}-resultBlockFragment`}>
-                            <div key={`${lineIndex}-resultBlock`} style={{ width: "min-content", display: "grid", gridTemplateColumns: "minmax(140px, 1fr)".repeat(maxColLength) }}>
+                            <div key={`${lineIndex}-resultBlock`} style={{ flex: "0", width: "min-content", display: "grid", gridTemplateColumns: "minmax(140px, 1fr)".repeat(maxColLength) }}>
                                 {
                                     line.resultColumns.map((col: string, i: number) => (
                                         <div key={`${lineIndex}-${i}-startingBlockFiller`} style={{ height: lineHeight, gridColumnStart: i + 1, gridColumnEnd: i + 2, userSelect: "none", cursor: "pointer", textAlign: 'left', paddingLeft: 2, paddingRight: 2 }} onClick={() => handleExpandRow(lineIndex, !line.expanded)} className={lineIndex == queryResult.length - 1 ? DARK_MODE ? 'result-dark' : 'result' : `gradient-1`}>
@@ -66,7 +66,7 @@ export function OutputComponent(props: OutputComponentProps) {
                                     })
                                 }
                                 {
-                                    line.expanded && line.resultRows.length > 5 && lineIndex + 1 < queryResult.length &&
+                                    line.expanded && line.resultRows.length > (lineIndex + 1 < queryResult.length ? 5 : 25) &&
                                         <div key={`${lineIndex}-moreEntriesBlockFiller`} style={{ height: lineHeight, fontSize, gridColumnStart: 1, gridColumnEnd: -1, color: "#000", userSelect: "none", textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', textAlign: 'left', paddingLeft: 2, paddingRight: 2 }}>
                                             ...
                                         </div>
