@@ -30,7 +30,7 @@ export function OutputComponent(props: OutputComponentProps) {
             <Fragment>
                 <div style={{ width: "min-content", display: "grid", gridTemplateColumns: "minmax(140px, 1fr)".repeat(maxColLength) }}>
                     {
-                        [...Array(queryResult[0].lineRange.start - 1)].map((i: number, idx: number) => (
+                        [...Array(queryResult[0].lineRange.start - 1)].map((_: number, idx: number) => (
                             <div key={`${idx}-startingBlockFillerLine`} style={{ height: lineHeight, fontSize, gridColumnStart: 1, gridColumnEnd: -1, color: "#000", userSelect: "none", textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', textAlign: 'left' }}>
                             </div>
                         ))
