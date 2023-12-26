@@ -56,7 +56,7 @@ export function OutputComponent(props: OutputComponentProps) {
                                         </div>
                                     ))
                                 }{
-                                    line.expanded && line.resultRows.map((row: string[]) => {
+                                    line.expanded && line.resultRows.slice(0, lineIndex + 1 < queryResult.length ? 5 : line.resultRows.length).map((row: string[]) => {
                                         counter--;
                                         return row.map((val: string, i: number) => (
                                             <div key={`${lineIndex}-${i}-value`} style={{ height: lineHeight, fontSize, gridColumnStart: i + 1, gridColumnEnd: i + 2, userSelect: "none", textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', textAlign: 'left', paddingLeft: 2, paddingRight: 2 }}>
@@ -64,7 +64,14 @@ export function OutputComponent(props: OutputComponentProps) {
                                             </div>
                                         ))
                                     })
-                                }{
+                                }
+                                {
+                                    line.expanded && line.resultRows.length > 5 && lineIndex + 1 < queryResult.length &&
+                                        <div key={`${lineIndex}-moreEntriesBlockFiller`} style={{ height: lineHeight, fontSize, gridColumnStart: 1, gridColumnEnd: -1, color: "#000", userSelect: "none", textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', textAlign: 'left', paddingLeft: 2, paddingRight: 2 }}>
+                                            ...
+                                        </div>
+                                }
+                                {
                                     counter > 0 && [...Array(counter)].map((_, idx: number) => (
                                         <div key={`${lineIndex}-${idx}-endingBlockFiller`} style={{ height: lineHeight, fontSize, gridColumnStart: 1, gridColumnEnd: -1, color: "#000", userSelect: "none", textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', textAlign: 'left', paddingLeft: 2, paddingRight: 2 }}>
                                         </div>
