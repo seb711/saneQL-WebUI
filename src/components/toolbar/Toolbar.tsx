@@ -62,7 +62,7 @@ export const Toolbar = () => {
                             </MenuItem>
                         ))}
                     </Select>
-                    <IconButton onClick={handleQueryInput} style={{ marginLeft: 16, marginRight: 8 }}>
+                    <IconButton onClick={handleQueryInput} style={{ marginLeft: 16, marginRight: 8 }}  title="CMD + ENTER">
                         <RunIcon sx={{fontSize: "1.3em"}}/>
                     </IconButton>
                 </div>
