@@ -188,13 +188,14 @@ customer
 .join(orders, o_custkey=c_custkey, type:=leftanti)
 .groupby({cntrycode}, {numcust:=count(), totacctbal:=sum(c_acctbal)})
 .orderby({cntrycode})`,
-"FOREIGN-FEATURE": `let date(spec, modifier expression := '+0 seconds') := foreigncall('date', date, {spec, modifier}),
+"FOREIGN-FEATURE": `let round(num, decPlaces := 0) := foreigncall('round', integer, {num, decPlaces}),
 let concat(string1, string2, string3 := "") := foreigncall('||', text, {string1, string2, string3}, type := operator),
 orders
-.filter(o_orderdate < date('1995-03-15', '+10 days'))
+.filter(o_custkey = 775)
 .map({txt := concat(o_orderstatus, ' comment: ', o_comment)})
+.map({totalPrice := round(o_totalprice, -2)})
 .orderby({o_orderdate.desc()}, limit:=10)
-.project({o_orderkey, o_orderdate, txt})`,
+.project({o_orderkey, o_orderdate, txt, totalPrice})`,
 "GENSYM-FEATURE": `let semijoin(preserve table, probe table, p expression, x symbol := gensym(x), y symbol :=gensym(y)) :=
    preserve
    .window({x:=row_number()})
